@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { getUser, logout, submitReview } from "@/actions";
 
 const Spinner = () => (
   <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -36,12 +37,11 @@ const Review = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (!storedUser) {
+    const userData = getUser();
+    if (!userData) {
       navigate("/auth");
       return;
     }
-    const userData = JSON.parse(storedUser);
     setUser(userData);
     
     if (userData.hasReviewed) {
@@ -60,22 +60,12 @@ const Review = () => {
     }
 
     setIsLoading(true);
-
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      const userData = JSON.parse(storedUser);
-      userData.hasReviewed = true;
-      localStorage.setItem("user", JSON.stringify(userData));
-    }
-
+    await submitReview(review);
     navigate("/roulette");
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
+    logout();
     navigate("/");
   };
 
