@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
+import { login, signup, getUser } from "@/actions";
 
 const Spinner = () => (
   <svg className="animate-spin h-5 w-5 text-gray-900" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -19,7 +20,7 @@ const Auth = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const user = localStorage.getItem("user");
+    const user = getUser();
     if (user) {
       navigate("/review");
     }
@@ -41,23 +42,16 @@ const Auth = () => {
 
     setIsLoading(true);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
     if (isLogin) {
-      const storedUser = localStorage.getItem("user");
-      if (storedUser) {
-        const user = JSON.parse(storedUser);
-        if (user.email === email && user.password === password) {
-          navigate("/review");
-          return;
-        }
+      const result = await login(email, password);
+      if (result.success) {
+        navigate("/review");
+      } else {
+        setIsLoading(false);
+        setError(result.error || "Invalid email or password");
       }
-      setIsLoading(false);
-      setError("Invalid email or password");
     } else {
-      const user = { name, email, password, hasReviewed: false };
-      localStorage.setItem("user", JSON.stringify(user));
+      await signup(name, email, password);
       navigate("/review");
     }
   };

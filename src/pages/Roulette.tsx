@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { getUser, logout, resetReviewStatus } from "@/actions";
 
 const Roulette = () => {
   const [user, setUser] = useState<{ name: string } | null>(null);
@@ -9,12 +10,11 @@ const Roulette = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (!storedUser) {
+    const userData = getUser();
+    if (!userData) {
       navigate("/auth");
       return;
     }
-    const userData = JSON.parse(storedUser);
     if (!userData.hasReviewed) {
       navigate("/review");
       return;
@@ -46,17 +46,12 @@ const Roulette = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
+    logout();
     navigate("/");
   };
 
   const resetGame = () => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      const userData = JSON.parse(storedUser);
-      userData.hasReviewed = false;
-      localStorage.setItem("user", JSON.stringify(userData));
-    }
+    resetReviewStatus();
     navigate("/review");
   };
 
